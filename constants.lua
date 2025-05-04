@@ -1,6 +1,6 @@
 local events <const> = {
-  AEROSPACE_WORKSPACE_CHANGED = "aerospace_workspace_changed",
-  AEROSPACE_SWITCH = "aerospace_switch",
+  YABAI_SPACE_CHANGED = "space_change",
+  YABAI_WINDOW_FOCUSED = "application_activated",
   SWAP_MENU_AND_SPACES = "swap_menu_and_spaces",
   FRONT_APP_SWITCHED = "front_app_switched",
   UPDATE_WINDOWS = "update_windows",
@@ -20,15 +20,15 @@ local items <const> = {
   CALENDAR = "widgets.calendar",
 }
 
-local aerospace <const> = {
-  LIST_ALL_WORKSPACES = "aerospace list-workspaces --all",
-  GET_CURRENT_WORKSPACE = "aerospace list-workspaces --focused",
-  LIST_WINDOWS = "aerospace list-windows --workspace focused --format \"id=%{window-id}, name=%{app-name}\"",
-  GET_CURRENT_WINDOW = "aerospace list-windows --focused --format %{app-name}",
+local yabai <const> = {
+  LIST_ALL_SPACES = "yabai -m query --spaces | jq -r '.[].label'",
+  GET_CURRENT_SPACE = "yabai -m query --spaces --space | jq -r '.label'",
+  LIST_WINDOWS = "yabai -m query --windows --space | jq -r '.[] | \"id=\" + (.id | tostring) + \", name=\" + .app'",
+  GET_CURRENT_WINDOW = "yabai -m query --windows --window | jq -r '.app'",
 }
 
 return {
   items = items,
   events = events,
-  aerospace = aerospace,
+  yabai = yabai,
 }

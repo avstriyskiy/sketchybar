@@ -33,37 +33,33 @@ local function addToggle()
     width = settings.dimens.padding.label
   })
 
-  menuToggle:subscribe("mouse.entered", function(env)
-    sbar.animate("tanh", 30, function()
-      menuToggle:set({
-        background = {
-          color = { alpha = 1.0 },
-          border_color = { alpha = 0.5 },
-        },
-        icon = { color = settings.colors.bg1 },
-        label = { width = "dynamic" }
-      })
-    end)
-  end)
-
-  menuToggle:subscribe("mouse.exited", function(env)
-    sbar.animate("tanh", 30, function()
-      menuToggle:set({
-        background = {
-          color = { alpha = 0.0 },
-          border_color = { alpha = 0.0 },
-        },
-        icon = { color = settings.colors.white },
-        label = { width = 0 }
-      })
-    end)
-  end)
+  -- menuToggle:subscribe("mouse.entered", function(env)
+  --   sbar.animate("tanh", 30, function()
+  --     menuToggle:set({
+  --       background = {
+  --         color = { alpha = 1.0 },
+  --         border_color = { alpha = 0.5 },
+  --       },
+  --       icon = { color = settings.colors.bg1 },
+  --       label = { width = "dynamic" }
+  --     })
+  --   end)
+  -- end)
+  --
+  -- menuToggle:subscribe("mouse.exited", function(env)
+  --   sbar.animate("tanh", 30, function()
+  --     menuToggle:set({
+  --       background = {
+  --         color = { alpha = 0.0 },
+  --         border_color = { alpha = 0.0 },
+  --       },
+  --       icon = { color = settings.colors.white },
+  --       label = { width = 0 }
+  --     })
+  --   end)
+  -- end)
 
   menuToggle:subscribe("mouse.clicked", function(env)
-    switchToggle(menuToggle)
-  end)
-
-  menuToggle:subscribe(constants.events.AEROSPACE_SWITCH, function(env)
     switchToggle(menuToggle)
   end)
 end

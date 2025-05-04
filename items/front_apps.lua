@@ -47,7 +47,7 @@ local function updateWindows(windows)
         string = icon,
         font = settings.fonts.icons(),
       },
-      click_script = "aerospace focus --window-id " .. windowId,
+      click_script = "yabai -m window --focus " .. windowId,
     })
 
     frontApps[windowName]:subscribe(constants.events.FRONT_APP_SWITCHED, function(env)
@@ -55,16 +55,20 @@ local function updateWindows(windows)
     end)
   end
 
-  sbar.exec(constants.aerospace.GET_CURRENT_WINDOW, function(frontAppName)
+  sbar.exec(constants.yabai.GET_CURRENT_WINDOW, function(frontAppName)
     selectFocusedWindow(frontAppName:gsub("[\n\r]", ""))
   end)
 end
 
 local function getWindows()
-  sbar.exec(constants.aerospace.LIST_WINDOWS, updateWindows)
+  sbar.exec(constants.yabai.LIST_WINDOWS, updateWindows)
 end
 
 frontAppWatcher:subscribe(constants.events.UPDATE_WINDOWS, function()
+  getWindows()
+end)
+
+frontAppWatcher:subscribe(constants.events.YABAI_WINDOW_FOCUSED, function()
   getWindows()
 end)
 

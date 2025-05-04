@@ -17,23 +17,25 @@ local currentWorkspaceWatcher = sbar.add("item", {
 -- copy "Icons" from the nerd fonts cheat sheet and replace icon and name accordingly below
 -- https://www.nerdfonts.com/cheat-sheet
 local spaceConfigs <const> = {
-  ["1"] = { icon = "󱞁", name = "Notes" },
-  ["2"] = { icon = "", name = "Terminal" },
-  ["3"] = { icon = "󰖟", name = "Browser" },
-  ["4"] = { icon = "", name = "AltBrowser" },
-  ["5"] = { icon = "", name = "Remote" },
-  ["6"] = { icon = "", name = "Database" },
-  ["7"] = { icon = "󰊻", name = "Chat" },
-  ["8"] = { icon = "", name = "Mail" },
-  ["9"] = { icon = "", name = "Music" },
-  ["10"] = { icon = "󰌾", name = "Secrets" },
-  ["t"] = { icon = "", name = "Meeting" },
+  ["terminal"] = { icon = "", name = "Terminal" },
+  ["browser"] = { icon = "", name = "Browser" },
+  ["messenger"] = { icon = "󰭹", name = "Social" },
+  ["db"] = { icon = "", name = "Database" },
+  ["postman"] = { icon = "", name = "Postman" },
+  ["obsidian"] = { icon = "󰇮", name = "Obsidian" },
+  ["meeting"] = { icon = "󰊻", name = "Meetings" },
+  ["secret"] = { icon = "󰌾", name = "Secret" },
+  ["music"] = { icon = "", name = "Music" },
+  -- ["t"] = { icon = "", name = "Meeting" },
 }
 
 local function selectCurrentWorkspace(focusedWorkspaceName)
   for sid, item in pairs(spaces) do
     if item ~= nil then
-      local isSelected = sid == constants.items.SPACES .. "." .. focusedWorkspaceName
+      -- Извлекаем метку пространства из sid (формат: workspaces.terminal, workspaces.browser, etc.)
+      local label = sid:match("%.(.+)$")
+      local isSelected = label == focusedWorkspaceName
+      
       item:set({
         icon = { color = isSelected and settings.colors.bg1 or settings.colors.white },
         label = { color = isSelected and settings.colors.bg1 or settings.colors.white },
@@ -46,7 +48,7 @@ local function selectCurrentWorkspace(focusedWorkspaceName)
 end
 
 local function findAndSelectCurrentWorkspace()
-  sbar.exec(constants.aerospace.GET_CURRENT_WORKSPACE, function(focusedWorkspaceOutput)
+  sbar.exec(constants.yabai.GET_CURRENT_SPACE, function(focusedWorkspaceOutput)
     local focusedWorkspaceName = focusedWorkspaceOutput:match("[^\r\n]+")
     selectCurrentWorkspace(focusedWorkspaceName)
   end)
@@ -56,33 +58,26 @@ local function addWorkspaceItem(workspaceName)
   local spaceName = constants.items.SPACES .. "." .. workspaceName
   local spaceConfig = spaceConfigs[workspaceName]
 
+  -- Для пустых меток (на случай если yabai вернет пространство без метки)
+  if workspaceName == "" or workspaceName == "nil" then
+    return
+  end
+
   spaces[spaceName] = sbar.add("item", spaceName, {
     label = {
       width = 0,
       padding_left = 0,
-      string = spaceConfig.name,
+      string = spaceConfig and spaceConfig.name or workspaceName,
     },
     icon = {
-      string = spaceConfig.icon or settings.icons.apps["default"],
+      string = spaceConfig and spaceConfig.icon or settings.icons.apps["default"],
       color = settings.colors.white,
     },
     background = {
       color = settings.colors.bg1,
     },
-    click_script = "aerospace workspace " .. workspaceName,
+    -- click_script = "yabai -m space --focus " .. spaceName,
   })
-
-  spaces[spaceName]:subscribe("mouse.entered", function(env)
-    sbar.animate("tanh", 30, function()
-      spaces[spaceName]:set({ label = { width = "dynamic" } })
-    end)
-  end)
-
-  spaces[spaceName]:subscribe("mouse.exited", function(env)
-    sbar.animate("tanh", 30, function()
-      spaces[spaceName]:set({ label = { width = 0 } })
-    end)
-  end)
 
   sbar.add("item", spaceName .. ".padding", {
     width = settings.dimens.padding.label
@@ -90,7 +85,7 @@ local function addWorkspaceItem(workspaceName)
 end
 
 local function createWorkspaces()
-  sbar.exec(constants.aerospace.LIST_ALL_WORKSPACES, function(workspacesOutput)
+  sbar.exec(constants.yabai.LIST_ALL_SPACES, function(workspacesOutput)
     for workspaceName in workspacesOutput:gmatch("[^\r\n]+") do
       addWorkspaceItem(workspaceName)
     end
@@ -104,9 +99,8 @@ swapWatcher:subscribe(constants.events.SWAP_MENU_AND_SPACES, function(env)
   sbar.set("/" .. constants.items.SPACES .. "\\..*/", { drawing = isShowingSpaces })
 end)
 
-currentWorkspaceWatcher:subscribe(constants.events.AEROSPACE_WORKSPACE_CHANGED, function(env)
-  selectCurrentWorkspace(env.FOCUSED_WORKSPACE)
-  sbar.trigger(constants.events.UPDATE_WINDOWS)
+currentWorkspaceWatcher:subscribe(constants.events.YABAI_SPACE_CHANGED, function(env)
+  findAndSelectCurrentWorkspace()
 end)
 
 createWorkspaces()
